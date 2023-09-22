@@ -4,75 +4,34 @@ class UsersService {
     this.model = model;
   }
   // Obtiene todos los usuarios sin la informacion sensible
-  getAllUsers = async (user) => {
+  getAllUsers = async () => {
     try {
-      const newUser = await query("SELECT * FROM users");
+      const newUser = await query(
+        "SELECT name, lastname, email, role FROM users"
+      );
       return newUser;
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Obtiene un user dependiendo del ID
+  // Obtiene un user dependiendo del user ID
   getUserById = async (uid) => {
     try {
-      const data = await query("SELECT * FROM users WHERE id = $1", [id]);
+      const data = await query("SELECT * FROM users WHERE id = $1", [uid]);
       const user = data.rows[0];
       return user;
     } catch (err) {
       return { error: true, data: err };
     }
   };
-  // Cambia la contraseña
-  changePass = async (uid, newPass) => {
+  // Obtiene un user dependiendo del user Email
+  getUserByEmail = async (email) => {
     try {
-      const newUser = await this.model.updateOne(
-        { _id: uid },
-        { password: newPass }
-      );
-      return newUser;
-    } catch (error) {
-      Logger.error("Error service changePass", error);
-    }
-  };
-  // Obtiene un user dependiendo del email
-  getUserByEmail = async (userEmail) => {
-    try {
-      const user = await this.model.findOne({ email: userEmail });
+      const data = await query("SELECT * FROM users WHERE email = $1", [email]);
+      const user = data.rows[0];
       return user;
-    } catch (error) {
-      Logger.error("Error service getUserByEmail", error);
-    }
-  };
-
-  // Obtiene todos los usuarios sin la informacion sensible
-  createUser = async () => {
-    try {
-      const users = await this.model
-        .find({})
-        .select("first_name last_name email role -_id ");
-      return users;
-    } catch (error) {
-      Logger.error("Error service getAllUsers", error);
-    }
-  };
-  // Elimina todos los usuarios que no tuvieron actividad en los ultimos 2 dias
-  findInactiveUsers = async (tiempoInactivo) => {
-    try {
-      const usuariosEncontrados = await this.model.find({
-        ultimaActividad: { $lt: tiempoInactivo },
-      });
-      return usuariosEncontrados;
-    } catch (error) {
-      Logger.error("Error service deleteInactiveUsers", error);
-    }
-  };
-  // Elimina un user con el user Id que se le pase
-  deleteById = async (uid) => {
-    try {
-      const deleteUser = this.model.findByIdAndRemove(uid);
-      return deleteUser;
-    } catch (error) {
-      Logger.error("Error en service deleteById", error);
+    } catch (err) {
+      return { error: true, data: err };
     }
   };
 }

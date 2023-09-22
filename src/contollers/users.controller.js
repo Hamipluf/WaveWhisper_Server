@@ -1,7 +1,7 @@
-import { query } from "../persistencia/postgreSQL/config.js";
-import customResponses from "../utils/custonResponse.js";
+import customResponses from "../utils/customResponse.js";
 import UserManager from "../persistencia/DAOS/users.posgres.js";
 import { hashPassword } from "../utils/config.js";
+import authManager from "../utils/authManager.js";
 
 const user = new UserManager();
 // Todos los users
@@ -49,7 +49,43 @@ export const getAll = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
-// Registrado
+// User por ID sin info sensible
+export const getOneById = async (req, res) => {
+  const { id } = req.params;
+  if (req.method !== "GET") {
+    res
+      .status(405)
+      .json(customResponses.badResponse(405, "Metodo no permitido"));
+  }
+  try {
+    const userDB = await user.getUserById(id);
+    if ("error" in userDB) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, userDB.message));
+    }
+    for (const key in userDB) {
+      if (typeof userDB[key] === "string") {
+        userDB[key] = userDB[key].trim();
+      }
+    }
+    const userResponse = {
+      name: userDB.name,
+      lastname: userDB.lastname,
+      email: userDB.email,
+      role: userDB.role,
+    };
+    res
+      .status(200)
+      .json(customResponses.responseOk(200, "User encontrado", userResponse));
+  } catch (error) {
+    console.error("Error al obtener los registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+// Registrar user
 export const register = async (req, res) => {
   if (req.method !== "POST") {
     res
@@ -62,49 +98,79 @@ export const register = async (req, res) => {
       .status(400)
       .json(customResponses.badResponse(400, "Faltan campos a completar"));
   }
-  console.log(name, lastname, email, password);
-  //   const user = await query(
-  //     `
-  //   INSERT INTO users (name, lastname, email, password)
-  //   VALUES ($1, $2, $3, $4)
-  //   RETURNING *;
-  // `,
-  //     [name, lastname, email, password]
-  //   );
-  //   console.log(user);
-  res.send("Hello");
+  try {
+    const hashPass = await hashPassword(password);
+    const newUser = {
+      name,
+      lastname,
+      email,
+      password: hashPass,
+    };
+    const userCreated = await user.registerUser(newUser);
+    const userRow = userCreated?.rows[0];
+    if ("error" in userCreated) {
+      return res
+        .status(400)
+        .json(customResponses.badResponse(400, userCreated.message));
+    }
+    const token = authManager.generateToken(userRow);
+    const userResponse = { user: userRow, token };
+    res
+      .status(200)
+      .json(
+        customResponses.responseOk(
+          200,
+          `User con el email: ${email} creado correctamente`,
+          userResponse
+        )
+      );
+  } catch (error) {
+    console.error("Error al crear el registros:", error);
+    return res
+      .status(500)
+      .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
 };
-// User por ID
-export const getOneById = async (req, res) => {
-  const { id } = req.params;
-  if (req.method !== "GET") {
+// logear a un user
+export const login = async (req, res) => {
+  if (req.method !== "POST") {
     res
       .status(405)
       .json(customResponses.badResponse(405, "Metodo no permitido"));
   }
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+  }
   try {
-    const userDB = await user.getUserById(id)
-    if ("error" in user) {
+    const data = { email, password };
+    const userDB = await user.loginUser(data);
+    if ("error" in userDB) {
       return res
         .status(400)
-        .json(
-          customResponses.badResponse(
-            400,
-            "Error en obtener datos",
-            user.message
-          )
-        );
+        .json(customResponses.badResponse(400, userDB.message));
     }
-    for (const key in user) {
-      if (typeof user[key] === "string") {
-        user[key] = user[key].trim();
-      }
-    }
+    const token = authManager.generateToken(userDB);
+    const insensitiveUser = {
+      name: userDB.name,
+      lastname: userDB.lastname,
+      email: userDB.email,
+      role: userDB.role,
+    };
+    const userResponse = { user: insensitiveUser, token };
     res
       .status(200)
-      .json(customResponses.responseOk(200, "User encontrado", user));
+      .json(
+        customResponses.responseOk(
+          200,
+          `Bienvenido ${userDB.name}`,
+          userResponse
+        )
+      );
   } catch (error) {
-    console.error("Error al obtener los registros:", error);
+    console.error("Error al leer el registro:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));

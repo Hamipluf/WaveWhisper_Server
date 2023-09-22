@@ -12,3 +12,11 @@ export async function hashPassword(password) {
     return "Error en hashar la contraseña", err;
   }
 }
+export async function comparePassword(password, passwordDB) {
+  try {
+    const comparedPassword = await bcrypt.compare(password, passwordDB);
+    return comparedPassword;
+  } catch (error) {
+    return { status: false, error };
+  }
+}
