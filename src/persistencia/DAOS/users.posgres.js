@@ -69,7 +69,11 @@ export default class UserManager {
       }
     } catch (error) {
       console.log("Error loginUser user.posgres", error);
+<<<<<<< HEAD
       return { error: true, message: "error en user.posgres login" };
+=======
+      return { error: true, message: err };
+>>>>>>> 00b11ad5ae68e132658ad6502c25a9c8cb938cce
     }
   }
 }
