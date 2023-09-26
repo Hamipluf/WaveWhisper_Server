@@ -15,6 +15,15 @@ const pool = new Pool({
   port: 5432, // Puerto predeterminado de PostgreSQL
   ssl: true, // Habilitar SSL/TLS
 });
+pool
+  .connect()
+  .then(() => {
+    console.log("Conexión a PostgreSQL establecida correctamente");
+  })
+  .catch((error) => {
+    console.error("Error al conectar a PostgreSQL:", error);
+  });
+
 export function query(text, params) {
   return pool.query(text, params);
 }
