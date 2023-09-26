@@ -7,6 +7,7 @@ const url_dev = process.env.URL_POSTGRESQL;
 const url_prod = process.env.URL_POSTGRESQL_PRODUC;
 const pool = new Pool({
   connectionString: url_prod,
+  ssl: true
 });
 pool
   .connect()
