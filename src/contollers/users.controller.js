@@ -2,7 +2,7 @@ import customResponses from "../utils/customResponse.js";
 import UserManager from "../persistencia/DAOS/users.posgres.js";
 import { hashPassword } from "../utils/config.js";
 import authManager from "../utils/authManager.js";
-
+import { serialize } from "cookie";
 const user = new UserManager();
 // Todos los users
 export const getAll = async (req, res) => {
@@ -108,20 +108,21 @@ export const register = async (req, res) => {
     };
     const userCreated = await user.registerUser(newUser);
     const userRow = userCreated?.rows[0];
+    console.log(userCreated);
     if ("error" in userCreated) {
       return res
         .status(400)
-        .json(customResponses.badResponse(400, userCreated.message));
+        .json(customResponses.badResponse(400, userCreated.data.detail));
     }
     const token = authManager.generateToken(userRow);
-    const userResponse = { user: userRow, token };
+
     res
       .status(200)
       .json(
         customResponses.responseOk(
           200,
           `User con el email: ${email} creado correctamente`,
-          userResponse
+          { user: userRow, token }
         )
       );
   } catch (error) {
@@ -134,45 +135,68 @@ export const register = async (req, res) => {
 // logear a un user
 export const login = async (req, res) => {
   if (req.method !== "POST") {
-    res
+    return res
       .status(405)
-      .json(customResponses.badResponse(405, "Metodo no permitido"));
+      .json(customResponses.badResponse(405, "Método no permitido"));
   }
+
   const { email, password } = req.body;
   if (!email || !password) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
+      .json(customResponses.badResponse(400, "Faltan campos por completar"));
   }
+
   try {
     const data = { email, password };
+
     const userDB = await user.loginUser(data);
+
     if ("error" in userDB) {
       return res
         .status(400)
         .json(customResponses.badResponse(400, userDB.message));
     }
+
     const token = authManager.generateToken(userDB);
+
     const insensitiveUser = {
       name: userDB.name,
       lastname: userDB.lastname,
       email: userDB.email,
       role: userDB.role,
     };
-    const userResponse = { user: insensitiveUser, token };
-    res
-      .status(200)
-      .json(
-        customResponses.responseOk(
-          200,
-          `Bienvenido ${userDB.name}`,
-          userResponse
-        )
-      );
+
+    // Respuesta exitosa con el token
+    return res.status(200).json(
+      customResponses.responseOk(200, `Bienvenido ${userDB.name}`, {
+        user: insensitiveUser,
+        token,
+      })
+    );
   } catch (error) {
     console.error("Error al leer el registro:", error);
     return res
       .status(500)
       .json(customResponses.badResponse(500, "Error en el servidor", error));
+  }
+};
+export const authUser = (req, res) => {
+  const currentUser = req.user;
+  if (currentUser) {
+    const insensitiveUser = {
+      id: currentUser.id,
+      name: currentUser.name,
+      lastname: currentUser.lastname,
+      email: currentUser.email,
+      role: currentUser.role,
+    };
+    return res
+      .status(200)
+      .json(customResponses.responseOk(200, "Curren user", insensitiveUser));
+  } else {
+    return res
+      .status(400)
+      .json(customResponses.badResponse(400, "No hay usuario logueado"));
   }
 };

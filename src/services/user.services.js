@@ -34,6 +34,19 @@ class UsersService {
       return { error: true, data: err };
     }
   };
+  // Crea un usuario
+  createAnUser = async (user) => {
+    const { name, lastname, email, password } = user;
+    try {
+      const userCreated = await query(
+        "INSERT INTO users (name, lastname, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
+        [name, lastname, email, password]
+      );
+      return userCreated;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
 }
 const usersServices = new UsersService();
 

@@ -31,7 +31,7 @@ export default class UserManager {
       return { error: true, message: "Faltan campos a completar" };
     }
     try {
-      const newUser = usersServices.createUser(user);
+      const newUser = usersServices.createAnUser(user);
       return newUser
         ? newUser
         : {
@@ -49,9 +49,7 @@ export default class UserManager {
     }
     try {
       const user = await usersServices.getUserByEmail(email);
-      return user
-        ? user
-        : { error: true, message: `No hay un user con el email ${email}` };
+      return user ? user : { error: true, message: `Email incorrecto` };
     } catch (err) {
       console.log("ERROR getUserByEmail users.posgres", err);
       return { error: true, data: err };
