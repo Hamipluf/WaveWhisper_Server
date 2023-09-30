@@ -9,6 +9,9 @@ const secret_cookie = process.env.SECRET_COOKIE;
 import main from "./routes/main.route.js";
 import explore from "./routes/explore.route.js";
 import users from "./routes/users.route.js";
+// Passport
+import passport from "passport";
+import "./passport/spotifyStrategy.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -26,6 +29,9 @@ app.use(
 app.options("*", cors());
 
 app.use(express.urlencoded({ extended: true }));
+
+//inicializar passport
+app.use(passport.initialize());
 
 //Rutas
 app.use("/", main);

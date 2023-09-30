@@ -47,6 +47,17 @@ class UsersService {
       return { error: true, data: err };
     }
   };
+  // Modifica una columnta
+  modifyUserSpotify = async (username, photos, id) => {
+    try {
+      const userModified = await query(
+        `UPDATE users SET username = ${username}, photos = ${photos} WHERE id = ${id} RETURNING *`
+      );
+      return userModified;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
 }
 const usersServices = new UsersService();
 

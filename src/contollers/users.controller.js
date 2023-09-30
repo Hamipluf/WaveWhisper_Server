@@ -181,6 +181,7 @@ export const login = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Autentica y recupera el user loggeado
 export const authUser = (req, res) => {
   const currentUser = req.user;
   if (currentUser) {
@@ -200,3 +201,7 @@ export const authUser = (req, res) => {
       .json(customResponses.badResponse(400, "No hay usuario logueado"));
   }
 };
+// Recuperacion de datos con spotify
+export const callbackSpotify  = (req,res) => {
+  res.send("logged")
+}
