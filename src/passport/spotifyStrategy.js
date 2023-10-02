@@ -19,11 +19,11 @@ passport.use(
     async function (accessToken, refreshToken, profile, done) {
       const emailSpotify = profile._json.email;
       const username = profile._json.display_name;
-      const photos = profile._json.images;
+      const photos = profile.photos;
       try {
         const user = await userManager.getUserByEmail(emailSpotify);
-        console.log("USERR", user);
-        if (!user) {
+        console.log(user);
+        if (user.error) {
           const newUserData = {
             name: "",
             lastname: "",
@@ -31,19 +31,20 @@ passport.use(
             password: "",
             role: "user",
             username: profile._json.display_name,
-            photos: profile._json.images,
+            photos: profile.photos,
           };
           const newUser = await userManager.registerUser(newUserData);
-          console.log("NEW USER", newUser);
-          return done(null, newUser);
+          return done(null, { newUser, accessToken });
         }
-        // const userModified = await userManager.modifyUserSpotify(
-        //   username,
-        //   photos,
-        //   user.id
-        // );
-        // console.log("USER MODIFEIED", userModified);
-        // return done(null, userModified);
+        if (!user.username) {
+          const userModified = await userManager.modifyUserSpotify(
+            username,
+            photos,
+            user.id
+          );
+          return done(null, { userModified, accessToken });
+        }
+        return done(null, {user, accessToken});
       } catch (error) {
         const message = "Error en la autenticacion con spotify";
         return done(message, false);

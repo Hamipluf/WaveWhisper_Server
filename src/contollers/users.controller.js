@@ -104,11 +104,13 @@ export const register = async (req, res) => {
       name,
       lastname,
       email,
+      role: "user",
+      username: "",
+      photos: [],
       password: hashPass,
     };
     const userCreated = await user.registerUser(newUser);
     const userRow = userCreated?.rows[0];
-    console.log(userCreated);
     if ("error" in userCreated) {
       return res
         .status(400)
@@ -202,6 +204,8 @@ export const authUser = (req, res) => {
   }
 };
 // Recuperacion de datos con spotify
-export const callbackSpotify  = (req,res) => {
-  res.send("logged")
-}
+export const callbackSpotify = (req, res) => {
+  console.log(req.user);
+  console.log(req.accessToken);
+  res.send("logged");
+};

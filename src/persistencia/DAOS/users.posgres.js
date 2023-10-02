@@ -73,6 +73,7 @@ export default class UserManager {
   async modifyUserSpotify(username, photos, id) {
     try {
       const data = await usersServices.modifyUserSpotify(username, photos, id);
+      console.log("Data userManager modifyUserSpotify", data);
       const userModified = data.rows;
       return userModified;
     } catch (error) {
