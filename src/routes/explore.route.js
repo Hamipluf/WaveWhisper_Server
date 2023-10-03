@@ -1,8 +1,16 @@
 import { Router } from "express";
-import { getSong } from "../contollers/explore.controller.js";
+import {
+  getMyPlayList,
+  getSongById,
+  getTopTen,
+  getSongByName
+} from "../contollers/explore.controller.js";
 
 const router = Router();
 
-router.get("/", getSong);
+router.get("/my-play-list", getMyPlayList);
+router.get("/top-ten", getTopTen);
+router.get("/song-id/:tid", getSongById);
+router.get("/song-name/:songName", getSongByName);
 
 export default router;

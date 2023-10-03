@@ -12,11 +12,18 @@ import users from "./routes/users.route.js";
 // Passport
 import passport from "passport";
 import "./passport/spotifyStrategy.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Configuracion Server
+app.use(
+  cookieParser(process.env.SECRET_COOKIE, {
+    maxAge: 7200000, // 2 horas en milisegundos
+    httpOnly: true,
+  })
+);
 app.use(express.json());
 app.use(
   cors({

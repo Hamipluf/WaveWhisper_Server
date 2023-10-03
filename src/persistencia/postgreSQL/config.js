@@ -20,10 +20,6 @@ pool
     console.error("Error al conectar a PostgreSQL:", error);
   });
 
-pool.on("error", (err) => {
-  console.error("Error en la conexión a PostgreSQL:", err);
-});
-
 export function query(text, params) {
   return pool.query(text, params);
 }

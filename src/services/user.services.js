@@ -36,11 +36,31 @@ class UsersService {
   };
   // Crea un usuario
   createAnUser = async (user) => {
-    const { name, lastname, email, password, role, username, photos } = user;
+    const {
+      name,
+      lastname,
+      email,
+      password,
+      role,
+      username,
+      photos,
+      sid,
+      s_followers,
+    } = user;
     try {
       const userCreated = await query(
-        "INSERT INTO users (name, lastname, email, password, role, username, photos) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        [name, lastname, email, password, role, username, photos]
+        "INSERT INTO users (name, lastname, email, password, role, username, photos, sid, s_followers) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+        [
+          name,
+          lastname,
+          email,
+          password,
+          role,
+          username,
+          photos,
+          sid,
+          s_followers,
+        ]
       );
       return userCreated;
     } catch (err) {
@@ -48,14 +68,12 @@ class UsersService {
     }
   };
   // Modifica una columnta
-  modifyUserSpotify = async (username, photos, id) => {
-    console.log("Entrada de datos en userService", username, photos, id);
+  modifyUserSpotify = async (username, photos, sid, s_followers, id) => {
     try {
       const userModified = await query(
-        "UPDATE users SET username = $1, photos = $2 WHERE id = $3",
-        [username, photos, id]
+        "UPDATE users SET username = $1, photos = $2, sid = $3, s_followers = $4 WHERE id = $5",
+        [username, photos, sid, s_followers, id]
       );
-      console.log(("Salida de datos en userService", userModified));
       return userModified;
     } catch (err) {
       return { error: true, data: err };

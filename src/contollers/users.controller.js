@@ -2,6 +2,7 @@ import customResponses from "../utils/customResponse.js";
 import UserManager from "../persistencia/DAOS/users.posgres.js";
 import { hashPassword } from "../utils/config.js";
 import authManager from "../utils/authManager.js";
+import cookieParser from "cookie-parser";
 import { serialize } from "cookie";
 const user = new UserManager();
 // Todos los users
@@ -205,7 +206,13 @@ export const authUser = (req, res) => {
 };
 // Recuperacion de datos con spotify
 export const callbackSpotify = (req, res) => {
-  console.log(req.user);
-  console.log(req.accessToken);
-  res.send("logged");
+  const { user } = req;
+  if (!user) {
+    return res.redirect("/login");
+  }
+  console.log(user);
+  res.cookie("spotifyUser", JSON.stringify(user), {
+    signed: true,
+  });
+  res.redirect("http://localhost:3000/");
 };
