@@ -12,7 +12,7 @@ passport.use(
     {
       clientID: client_id,
       clientSecret: client_id_secret,
-      callbackURL: "http://localhost:3000/api/users/spotify/callback", // Asegúrate de ajustar la URL de redireccionamiento
+      callbackURL: "https://wavewhisper-server.onrender.com/api/users/spotify/callback",
       authorizationURL: "https://accounts.spotify.com/authorize",
       scope: ["user-read-email"],
     },
