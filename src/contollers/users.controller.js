@@ -214,5 +214,5 @@ export const callbackSpotify = (req, res) => {
   res.cookie("spotifyUser", JSON.stringify(user), {
     signed: true,
   });
-  res.redirect("http://localhost:3000/");
+  res.redirect("/");
 };
