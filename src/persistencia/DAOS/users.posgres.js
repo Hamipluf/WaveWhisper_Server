@@ -70,4 +70,20 @@ export default class UserManager {
       return { error: true, message: "error en user.posgres login" };
     }
   }
+  async modifyUserSpotify(username, photos, sid, s_followers, id) {
+    try {
+      const data = await usersServices.modifyUserSpotify(
+        username,
+        photos,
+        sid,
+        s_followers,
+        id
+      );
+      const userModified = data.rows;
+      return userModified;
+    } catch (error) {
+      console.log("Error modifyUser user.posgres", error);
+      return { error: true, message: "error en user.posgres modifyUser" };
+    }
+  }
 }

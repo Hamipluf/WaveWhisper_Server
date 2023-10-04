@@ -2,6 +2,7 @@ import customResponses from "../utils/customResponse.js";
 import UserManager from "../persistencia/DAOS/users.posgres.js";
 import { hashPassword } from "../utils/config.js";
 import authManager from "../utils/authManager.js";
+import cookieParser from "cookie-parser";
 import { serialize } from "cookie";
 const user = new UserManager();
 // Todos los users
@@ -104,11 +105,13 @@ export const register = async (req, res) => {
       name,
       lastname,
       email,
+      role: "user",
+      username: "",
+      photos: [],
       password: hashPass,
     };
     const userCreated = await user.registerUser(newUser);
     const userRow = userCreated?.rows[0];
-    console.log(userCreated);
     if ("error" in userCreated) {
       return res
         .status(400)
@@ -181,6 +184,7 @@ export const login = async (req, res) => {
       .json(customResponses.badResponse(500, "Error en el servidor", error));
   }
 };
+// Autentica y recupera el user loggeado
 export const authUser = (req, res) => {
   const currentUser = req.user;
   if (currentUser) {
@@ -199,4 +203,16 @@ export const authUser = (req, res) => {
       .status(400)
       .json(customResponses.badResponse(400, "No hay usuario logueado"));
   }
+};
+// Recuperacion de datos con spotify
+export const callbackSpotify = (req, res) => {
+  const { user } = req;
+  if (!user) {
+    return res.redirect("/login");
+  }
+  console.log(user);
+  res.cookie("spotifyUser", JSON.stringify(user), {
+    signed: true,
+  });
+  res.redirect("http://localhost:3000/");
 };

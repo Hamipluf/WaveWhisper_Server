@@ -36,13 +36,45 @@ class UsersService {
   };
   // Crea un usuario
   createAnUser = async (user) => {
-    const { name, lastname, email, password } = user;
+    const {
+      name,
+      lastname,
+      email,
+      password,
+      role,
+      username,
+      photos,
+      sid,
+      s_followers,
+    } = user;
     try {
       const userCreated = await query(
-        "INSERT INTO users (name, lastname, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-        [name, lastname, email, password]
+        "INSERT INTO users (name, lastname, email, password, role, username, photos, sid, s_followers) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
+        [
+          name,
+          lastname,
+          email,
+          password,
+          role,
+          username,
+          photos,
+          sid,
+          s_followers,
+        ]
       );
       return userCreated;
+    } catch (err) {
+      return { error: true, data: err };
+    }
+  };
+  // Modifica una columnta
+  modifyUserSpotify = async (username, photos, sid, s_followers, id) => {
+    try {
+      const userModified = await query(
+        "UPDATE users SET username = $1, photos = $2, sid = $3, s_followers = $4 WHERE id = $5",
+        [username, photos, sid, s_followers, id]
+      );
+      return userModified;
     } catch (err) {
       return { error: true, data: err };
     }

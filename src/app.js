@@ -9,11 +9,21 @@ const secret_cookie = process.env.SECRET_COOKIE;
 import main from "./routes/main.route.js";
 import explore from "./routes/explore.route.js";
 import users from "./routes/users.route.js";
+// Passport
+import passport from "passport";
+import "./passport/spotifyStrategy.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Configuracion Server
+app.use(
+  cookieParser(process.env.SECRET_COOKIE, {
+    maxAge: 7200000, // 2 horas en milisegundos
+    httpOnly: true,
+  })
+);
 app.use(express.json());
 app.use(
   cors({
@@ -26,6 +36,9 @@ app.use(
 app.options("*", cors());
 
 app.use(express.urlencoded({ extended: true }));
+
+//inicializar passport
+app.use(passport.initialize());
 
 //Rutas
 app.use("/", main);
