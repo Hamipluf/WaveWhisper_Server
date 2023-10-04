@@ -208,11 +208,12 @@ export const authUser = (req, res) => {
 export const callbackSpotify = (req, res) => {
   const { user } = req;
   if (!user) {
-    return res.redirect("/login");
+    return res.redirect("http://localhost:5173/login");
   }
   console.log(user);
   res.cookie("spotifyUser", JSON.stringify(user), {
     signed: true,
   });
-  res.redirect("/");
+  // Recordar cambiar a produccion
+  res.redirect("http://localhost:5173/");
 };
