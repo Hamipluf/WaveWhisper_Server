@@ -6,9 +6,9 @@ const { Pool } = pkg;
 const production = process.env.PRODUCTION;
 let url;
 
-production
-  ? (url = process.env.URL_POSTGRESQL)
-  : (url = process.env.URL_POSTGRESQL_PRODUC);
+production === "TRUE"
+  ? (url = process.env.URL_POSTGRESQL_PRODUC)
+  : (url = process.env.URL_POSTGRESQL)
 
 const pool = new Pool({
   connectionString: url,
