@@ -2,8 +2,6 @@ import customResponses from "../utils/customResponse.js";
 import UserManager from "../persistencia/DAOS/users.posgres.js";
 import { hashPassword } from "../utils/config.js";
 import authManager from "../utils/authManager.js";
-import cookieParser from "cookie-parser";
-import { serialize } from "cookie";
 const user = new UserManager();
 // Todos los users
 export const getAll = async (req, res) => {
@@ -87,102 +85,50 @@ export const getOneById = async (req, res) => {
   }
 };
 // Registrar user
-export const register = async (req, res) => {
-  if (req.method !== "POST") {
-    res
-      .status(405)
-      .json(customResponses.badResponse(405, "Metodo no permitido"));
-  }
-  const { name, lastname, email, password } = req.body;
-  if (!name || !lastname || !email || !password) {
-    return res
-      .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos a completar"));
-  }
-  try {
-    const hashPass = await hashPassword(password);
-    const newUser = {
-      name,
-      lastname,
-      email,
-      role: "user",
-      username: "",
-      photos: [],
-      password: hashPass,
-    };
-    const userCreated = await user.registerUser(newUser);
-    const userRow = userCreated?.rows[0];
-    if ("error" in userCreated) {
-      return res
-        .status(400)
-        .json(customResponses.badResponse(400, userCreated.data.detail));
-    }
-    const token = authManager.generateToken(userRow);
-
-    res
-      .status(200)
-      .json(
-        customResponses.responseOk(
-          200,
-          `User con el email: ${email} creado correctamente`,
-          { user: userRow, token }
-        )
-      );
-  } catch (error) {
-    console.error("Error al crear el registros:", error);
-    return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
-  }
-};
-// logear a un user
-export const login = async (req, res) => {
+export const register = (req, res) => {
   if (req.method !== "POST") {
     return res
       .status(405)
       .json(customResponses.badResponse(405, "Método no permitido"));
   }
-
-  const { email, password } = req.body;
-  if (!email || !password) {
+  const user = req.user;
+  if ("error" in user) {
     return res
       .status(400)
-      .json(customResponses.badResponse(400, "Faltan campos por completar"));
+      .send(
+        customResponses.badResponse(400, user?.message || user?.data, undefined)
+      );
   }
+  const token = authManager.generateToken(user);
+  res
+    .cookie("jwt", token, {
+      signed: true,
+    })
+    .json(customResponses.responseOk(200, "User registrado con exito", user));
+};
 
-  try {
-    const data = { email, password };
-
-    const userDB = await user.loginUser(data);
-
-    if ("error" in userDB) {
-      return res
-        .status(400)
-        .json(customResponses.badResponse(400, userDB.message));
-    }
-
-    const token = authManager.generateToken(userDB);
-
-    const insensitiveUser = {
-      name: userDB.name,
-      lastname: userDB.lastname,
-      email: userDB.email,
-      role: userDB.role,
-    };
-
-    // Respuesta exitosa con el token
-    return res.status(200).json(
-      customResponses.responseOk(200, `Bienvenido ${userDB.name}`, {
-        user: insensitiveUser,
-        token,
-      })
-    );
-  } catch (error) {
-    console.error("Error al leer el registro:", error);
+// logear a un user
+export const login = (req, res) => {
+  if (req.method !== "POST") {
     return res
-      .status(500)
-      .json(customResponses.badResponse(500, "Error en el servidor", error));
+      .status(405)
+      .json(customResponses.badResponse(405, "Método no permitido"));
   }
+  const user = req.user;
+  if (user.error) {
+    console.log("Error controller loguinUser");
+    return res
+      .status(404)
+      .send(
+        customResponses.badResponse(404, user?.message || user?.data, undefined)
+      );
+  }
+  const token = authManager.generateToken(user);
+  res
+    .cookie("jwt", token, {
+      signed: true,
+    })
+    .json(customResponses.responseOk(200, "Bienvenido", user));
 };
 // Autentica y recupera el user loggeado
 export const authUser = (req, res) => {
@@ -210,8 +156,8 @@ export const callbackSpotify = (req, res) => {
   if (!user) {
     return res.redirect("/login");
   }
-  console.log(user);
-  res.cookie("spotifyUser", JSON.stringify(user), {
+  const token = authManager.generateToken(user);
+  res.cookie("jwt", JSON.stringify(token), {
     signed: true,
   });
   res.redirect("http://localhost:3000/");

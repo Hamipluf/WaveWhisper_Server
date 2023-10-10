@@ -1,5 +1,6 @@
 import usersServices from "../../services/user.services.js";
-import { comparePassword } from "../../utils/config.js";
+import authManager from "../../utils/authManager.js";
+import { comparePassword, hashPassword } from "../../utils/config.js";
 export default class UserManager {
   // Obtiene todos los usuarios
   async getAllUsers() {
@@ -27,19 +28,29 @@ export default class UserManager {
     }
   }
   async registerUser(user) {
-    if (!user) {
+    const { name, lastname, email, password, role, username } = user;
+    console.log(user)
+    if (!name || !lastname || !email || !password || !role || !username) {
       return { error: true, message: "Faltan campos a completar" };
     }
     try {
-      const newUser = usersServices.createAnUser(user);
-      return newUser
-        ? newUser
-        : {
-            error: true,
-            message: `No se pudo crear el user con el email ${email}`,
-          };
-    } catch (error) {
-      console.log("ERROR registerUser users.posgres", error);
+      const passwordHashed = await hashPassword(password);
+      const userData = {
+        name,
+        lastname,
+        email,
+        password: passwordHashed,
+        role,
+        username,
+      };
+      const newUser = await usersServices.createAnUser(userData);
+      let response;
+      newUser.error
+        ? (response = { error: true, message: newUser.data })
+        : (response = newUser.rows[0]);
+      return response;
+    } catch (err) {
+      console.log("ERROR registerUser users.posgres", err);
       return { error: true, data: err };
     }
   }
