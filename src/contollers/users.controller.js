@@ -107,7 +107,6 @@ export const register = (req, res) => {
     })
     .json(customResponses.responseOk(200, "User registrado con exito", user));
 };
-
 // logear a un user
 export const login = (req, res) => {
   if (req.method !== "POST") {
@@ -134,22 +133,24 @@ export const login = (req, res) => {
 // Autentica y recupera el user loggeado
 export const authUser = (req, res) => {
   const currentUser = req.user;
-  if (currentUser) {
-    const insensitiveUser = {
-      id: currentUser.id,
-      name: currentUser.name,
-      lastname: currentUser.lastname,
-      email: currentUser.email,
-      role: currentUser.role,
-    };
-    return res
-      .status(200)
-      .json(customResponses.responseOk(200, "Curren user", insensitiveUser));
-  } else {
+  if (!currentUser) {
     return res
       .status(400)
       .json(customResponses.badResponse(400, "No hay usuario logueado"));
   }
+  const insensitiveUser = {
+    id: currentUser.id,
+    name: currentUser.name,
+    lastname: currentUser.lastname,
+    email: currentUser.email,
+    username: currentUser.username,
+    photos: currentUser.photos,
+    sid: currentUser.sid,
+    s_followers: currentUser.s_followers,
+  };
+  res
+    .status(200)
+    .json(customResponses.responseOk(200, "Curren user", insensitiveUser));
 };
 // Recuperacion de datos con spotify
 export const callbackSpotify = (req, res) => {

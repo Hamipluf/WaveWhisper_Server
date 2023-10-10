@@ -8,17 +8,11 @@ import {
   callbackSpotify,
 } from "../contollers/users.controller.js";
 import isAdmin from "../middlewares/adminVerify.middleware.js";
+import { authMiddleware } from "../middlewares/getCurrentUser.middleware.js";
 import passport from "passport";
 const router = Router();
 // user autenticado
-router.get(
-  "/",
-  passport.authenticate("jwtCookies", {
-    session: false,
-    passReqToCallback: true,
-  }),
-  authUser
-);
+router.get("/current", authMiddleware, authUser);
 // Todos los users
 router.get("/get-all", getAll);
 // Solamente authenticados y administradores tienen acceso a un solo user
