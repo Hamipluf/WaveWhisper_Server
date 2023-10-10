@@ -29,10 +29,6 @@ export default class UserManager {
   }
   async registerUser(user) {
     const { name, lastname, email, password, role, username } = user;
-    console.log(user)
-    if (!name || !lastname || !email || !password || !role || !username) {
-      return { error: true, message: "Faltan campos a completar" };
-    }
     try {
       const passwordHashed = await hashPassword(password);
       const userData = {

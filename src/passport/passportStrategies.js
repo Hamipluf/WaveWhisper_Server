@@ -9,7 +9,7 @@ const userManager = new UserManager();
 const client_id = process.env.CLIENT_ID_SPOTIFY;
 const client_id_secret = process.env.SECRET_KEY_SPOTIFY;
 const cookie_secret = process.env.SECRET_COOKIE;
-
+const url_production = process.env.URL_PRODUCCION;
 // Local Login
 passport.use(
   "Login",
@@ -75,7 +75,7 @@ passport.use(
     {
       clientID: client_id,
       clientSecret: client_id_secret,
-      callbackURL: "http://localhost:3000/api/users/spotify/callback", // Asegúrate de ajustar la URL de redireccionamiento
+      callbackURL: `${url_production}/users/spotify/callback`, // Asegúrate de ajustar la URL de redireccionamiento
       authorizationURL: "https://accounts.spotify.com/authorize",
       scope: ["user-read-email"],
     },

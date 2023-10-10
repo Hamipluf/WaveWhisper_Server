@@ -3,6 +3,7 @@ import UserManager from "../persistencia/DAOS/users.posgres.js";
 import { hashPassword } from "../utils/config.js";
 import authManager from "../utils/authManager.js";
 const user = new UserManager();
+const url_production = process.env.URL_PRODUCCION;
 // Todos los users
 export const getAll = async (req, res) => {
   if (req.method !== "GET") {
@@ -154,11 +155,11 @@ export const authUser = (req, res) => {
 export const callbackSpotify = (req, res) => {
   const { user } = req;
   if (!user) {
-    return res.redirect("/login");
+    return res.redirect(`${url_production}/login`);
   }
   const token = authManager.generateToken(user);
   res.cookie("jwt", JSON.stringify(token), {
     signed: true,
   });
-  res.redirect("http://localhost:3000/");
+  res.redirect(`${url_production}`);
 };
