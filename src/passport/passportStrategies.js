@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 import passport from "passport";
 import { Strategy as SpotifyStrategy } from "passport-spotify";
-import { ExtractJwt, Strategy as jwtStrategy } from "passport-jwt";
 import { Strategy as LocalStrategy } from "passport-local";
 import UserManager from "../persistencia/DAOS/users.posgres.js";
 const userManager = new UserManager();
@@ -117,29 +116,6 @@ passport.use(
         const message = "Error en la autenticacion con spotify";
         return done(message, false);
       }
-    }
-  )
-);
-
-const extactFromCookie = (req) => {
-  let token = null;
-  if (req && req.signedCookies) {
-    token = req.signedCookies.jwt;
-  }
-  console.log("jwt", token);
-  return token;
-};
-// Recupera los datos de jwt
-passport.use(
-  "jwtCookies",
-  new jwtStrategy(
-    {
-      jwtFromRequest: ExtractJwt.fromExtractors([extactFromCookie]),
-      secretOrKey: cookie_secret,
-    },
-    async (jwt_payload, done) => {
-      console.log(jwt_payload);
-      done(null, jwt_payload.user);
     }
   )
 );

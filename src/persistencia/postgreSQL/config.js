@@ -3,10 +3,15 @@ dotenv.config();
 import pkg from "pg";
 const { Pool } = pkg;
 
-// const url_dev = process.env.URL_POSTGRESQL;
-const url_prod = process.env.URL_POSTGRESQL_PRODUC;
+const production = process.env.PRODUCTION;
+let url;
+
+production
+  ? (url = process.env.URL_POSTGRESQL)
+  : (url = process.env.URL_POSTGRESQL_PRODUC);
+
 const pool = new Pool({
-  connectionString: url_prod,
+  connectionString: url,
   ssl: {
     rejectUnauthorized: false, // Desactiva la verificación de certificados
   },
